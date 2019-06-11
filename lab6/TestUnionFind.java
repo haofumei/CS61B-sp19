@@ -15,7 +15,11 @@ public class TestUnionFind {
         test1.union(3, 4);
         test1.union(1, 3);
         assertEquals(4, test1.sizeOf(1));
-        assertEquals(4, test1.parent(1));
+        // test find
+        assertEquals(4, test1.parents[1]);
+
+
+
 
     }
 
