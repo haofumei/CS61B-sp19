@@ -1,4 +1,4 @@
-public class UnionFind {
+public class UnionFind implements BGUnionFind {
 
     // TODO - Add instance variables?
     int[] parents;
@@ -30,7 +30,7 @@ public class UnionFind {
         // TODO
         // the final parent holds the size
         validate(v1);
-        return -parent(find(v1));
+        return -parent(parentHelp(v1));
     }
 
     /* Returns the parent of v1. If v1 is the root of a tree, returns the
@@ -96,6 +96,7 @@ public class UnionFind {
        allowing for fast search-time. */
     public int find(int vertex) {
         // TODO
+
         int nowV = vertex;
         int p = parentHelp(vertex);
         int lastparent;
@@ -105,6 +106,20 @@ public class UnionFind {
             nowV = lastparent;
         }
         return nowV;
+    }
+
+    /**
+     * for the BubbleGrid
+     */
+
+    // union the root of v1 to the root of v2
+    public void BGUnion(int v1, int v2) {
+        parents[v1] = parent(v2);
+    }
+
+     // change one item parent to 0.
+    public void reParent(int vertex) {
+        parents[vertex] = 0;
     }
 
 }
