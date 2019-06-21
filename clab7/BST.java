@@ -66,6 +66,18 @@ public class BST<Key extends Comparable<Key>> {
         return getRandomNode(root).key;
     }
 
+    /** calculate the average depth of the tree. */
+    public double averageDepth() {
+        return (double)averageDepth(root, 0) / size();
+    }
+    private int averageDepth(Node x, int i) {
+        if (x == null) {
+            return 0;
+        } else {
+            return i + averageDepth(x.left, i + 1) + averageDepth(x.right, i + 1);
+        }
+    }
+
 
     /** Private methods and variables follow. There's no need to read
      *  any of this.
