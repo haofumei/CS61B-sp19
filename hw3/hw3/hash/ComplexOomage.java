@@ -13,11 +13,12 @@ public class ComplexOomage implements Oomage {
     public int hashCode() {
         int total = 0;
         for (int x : params) {
-            total = total * 256;
+            total = total * 257; // change 256 to 257
             total = total + x;
         }
         return total;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -80,11 +81,36 @@ public class ComplexOomage implements Oomage {
         return new ComplexOomage(params);
     }
 
+    public static ComplexOomage deadlyComplexOomage(int firstInt) {
+        int N = 10;
+        ArrayList<Integer> params = new ArrayList<>(N);
+        params.add(firstInt);
+        for (int i = 1; i < N; i += 1) {
+            params.add(200);
+        }
+        return new ComplexOomage(params);
+    }
+
     public static void main(String[] args) {
-        System.out.println("Drawing 4 random complex Oomages.");
+        /*System.out.println("Drawing 4 random complex Oomages.");
         randomComplexOomage().draw(0.25, 0.25, 1.5);
         randomComplexOomage().draw(0.75, 0.75, 1.5);
         randomComplexOomage().draw(0.25, 0.75, 1.5);
-        randomComplexOomage().draw(0.75, 0.25, 1.5);
+        randomComplexOomage().draw(0.75, 0.25, 1.5);*/
+
+        ArrayList<Integer> params = new ArrayList<>(10);
+        params.add(80);
+        for (int i = 1; i < 10; i += 1) {
+            params.add(200);
+        }
+        ComplexOomage test = new ComplexOomage(params);
+        int total = 11;
+        for (int i = 1; i < 10; i += 1) {
+            total = total * 257;
+            total = total + 200;
+        }
+        System.out.println(total);
+        System.out.println(test.hashCode());
+
     }
 } 
