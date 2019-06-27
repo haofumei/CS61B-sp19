@@ -1,9 +1,11 @@
+import java.util.LinkedList;
+
 /**
  * A String-like class that allows users to add and remove characters in the String
  * in constant time and have a constant-time hash function. Used for the Rabin-Karp
  * string-matching algorithm.
  */
-class RollingString{
+class RollingString {
 
     /**
      * Number of total possible int values a character can take on.
@@ -21,9 +23,21 @@ class RollingString{
      * Initializes a RollingString with a current value of String s.
      * s must be the same length as the maximum length.
      */
+
+    private LinkedList<Character> rollingString = new LinkedList();
+    private int hashCode = 0;
+    private int mul = 1;
+    private int size;
+
     public RollingString(String s, int length) {
         assert(s.length() == length);
-        /* FIX ME */
+        size = length;
+        helpMul();
+        for (int i = 0; i < length; i ++) {
+            rollingString.addLast(s.charAt(i));
+            hashCode = hashCode * UNIQUECHARS % PRIMEBASE;
+            hashCode = (hashCode + (int)s.charAt(i)) % PRIMEBASE;
+        }
     }
 
     /**
@@ -32,7 +46,16 @@ class RollingString{
      * Should be a constant-time operation.
      */
     public void addChar(char c) {
-        /* FIX ME */
+        rollingString.addLast(c);
+        char r = rollingString.remove();
+        hashCode = (UNIQUECHARS * (hashCode - (int)r * mul) + (int)c);
+        hashCode = Math.floorMod(hashCode, PRIMEBASE);
+    }
+
+    private void helpMul() {
+        for (int i = 1; i < this.size; i ++) {
+            mul = (mul * UNIQUECHARS) % PRIMEBASE;
+        }
     }
 
 
@@ -43,8 +66,10 @@ class RollingString{
      */
     public String toString() {
         StringBuilder strb = new StringBuilder();
-        /* FIX ME */
-        return "";
+        for (int i = 0; i < length(); i ++) {
+            strb.append(rollingString.get(i));
+        }
+        return strb.toString();
     }
 
     /**
@@ -52,8 +77,7 @@ class RollingString{
      * Should be a constant-time operation.
      */
     public int length() {
-        /* FIX ME */
-        return -1;
+        return this.size;
     }
 
 
@@ -64,8 +88,22 @@ class RollingString{
      */
     @Override
     public boolean equals(Object o) {
-        /* FIX ME */
-        return false;
+        if (this == o) {
+            return true;
+        }
+        if (this.getClass() != o.getClass()) {
+            return false;
+        }
+        RollingString temp = (RollingString)o;
+        if (this.length() != temp.length()) {
+            return false;
+        }
+        for (int i = 0; i < this.length(); i ++) {
+            if (this.rollingString.get(i) != temp.rollingString.get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -74,7 +112,6 @@ class RollingString{
      */
     @Override
     public int hashCode() {
-        /* FIX ME */
-        return -1;
+        return hashCode;
     }
 }
