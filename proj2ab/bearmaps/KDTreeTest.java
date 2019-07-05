@@ -19,6 +19,21 @@ public class KDTreeTest {
         return p;
     }
 
+    @Test
+    public void testKDComparedWithNV() {
+        List<Point> p = randomPoints(100000);
+        KDTree kd = new KDTree(p);
+        NaivePointSet nv = new NaivePointSet(p);
+        List<Point> queries = randomPoints(2000);
+
+        for (Point q : queries) {
+            Point actualKD = kd.nearest(q.getX(), q.getY());
+            Point actualNV = nv.nearest(q.getX(), q.getY());
+            assertEquals(actualKD, actualNV);
+            //System.out.println("KD: " + actualKD + " NV: " + actualNV);
+        }
+    }
+
     private void timeWithPointsAndQueriesKD(int pointCount, int  queryCount) {
         List<Point> p = randomPoints(pointCount);
         KDTree kd = new KDTree(p);
