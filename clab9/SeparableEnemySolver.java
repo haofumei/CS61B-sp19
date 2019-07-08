@@ -24,9 +24,47 @@ public class SeparableEnemySolver {
      */
     public boolean isSeparable() {
         // TODO: Fix me
-        return false;
+        Object[] nodes = g.labels().toArray();
+        Set markSet = new HashSet();
+        Map par = new HashMap();
+        boolean[] isSeparable = new boolean[1];
+        isSeparable[0] = true;
+        for (Object o : nodes) {
+            if (!markSet.contains(o)) {
+                String start = (String)o;
+                dfsCycle(start, start, markSet, par, isSeparable);
+            }
+        }
+        return isSeparable[0];
     }
 
+
+    private void dfsCycle(String u, String p, Set mark, Map<String, String> par, boolean[] isSeparable) {
+        // marks visited node
+       mark.add(u);
+       for (String neighbor : g.neighbors(u)) {
+           // check if neighbor is the parent of u
+           if (neighbor == p) {
+               continue;
+           }
+           // if the neighbor is not be marked, keep dfs
+           if (!mark.contains(neighbor)) {
+               par.put(neighbor, u);
+               dfsCycle(neighbor, u, mark, par, isSeparable);
+           } else {
+               // find the cycle
+               String cur = u;
+               int nodeCount = 1;
+               while (cur != null && !cur.equals(neighbor)) {
+                   cur = par.get(cur);
+                   nodeCount += 1;
+               }
+               if (nodeCount != 1 && nodeCount % 2 == 1) {
+                   isSeparable[0] = false;
+               }
+           }
+       }
+    }
 
     /* HELPERS FOR READING IN CSV FILES. */
 
