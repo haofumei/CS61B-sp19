@@ -34,6 +34,7 @@ public class TestSortAlgs {
         Stopwatch sw = new Stopwatch();
         Queue sortedQ = QuickSort.quickSort(test3);
         System.out.print("Sorting " + n + " items will cost " + sw.elapsedTime());
+        assertEquals(true, isSorted(sortedQ));
 
     }
 
@@ -60,8 +61,9 @@ public class TestSortAlgs {
             test3.enqueue(random.nextDouble());
         }
         Stopwatch sw = new Stopwatch();
-        MergeSort.mergeSort(test3);
+        Queue sortedQ = MergeSort.mergeSort(test3);
         System.out.print("Sorting " + n + " items will cost " + sw.elapsedTime());
+        assertEquals(true, isSorted(sortedQ));
     }
 
     /**
