@@ -2,9 +2,11 @@ package bearmaps.proj2c.server.handler.impl;
 
 import bearmaps.proj2c.AugmentedStreetMapGraph;
 import bearmaps.proj2c.server.handler.APIRouteHandler;
+import bearmaps.proj2c.utils.Constants;
 import spark.Request;
 import spark.Response;
-import bearmaps.proj2c.utils.Constants;
+import static bearmaps.proj2c.utils.Constants.*;
+
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static bearmaps.proj2c.utils.Constants.SEMANTIC_STREET_GRAPH;
-import static bearmaps.proj2c.utils.Constants.ROUTE_LIST;
+
 
 /**
  * Handles requests from the web browser for map images. These images
@@ -84,12 +85,133 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
      */
     @Override
     public Map<String, Object> processRequest(Map<String, Double> requestParams, Response response) {
-        //System.out.println("yo, wanna know the parameters given by the web browser? They are:");
-        //System.out.println(requestParams);
+
+        double requestUllon = requestParams.get("ullon");
+        double requestUllat = requestParams.get("ullat");
+        double requestLrlon = requestParams.get("lrlon");
+        double requestLrlat = requestParams.get("lrlat");
+        if (!isSuccessful(requestUllon, requestUllat, requestLrlon, requestLrlat)) {
+            return queryFail();
+        }
+
         Map<String, Object> results = new HashMap<>();
-        System.out.println("Since you haven't implemented RasterAPIHandler.processRequest, nothing is displayed in "
-                + "your browser.");
+        double londpp = LonDPP(requestUllon, requestLrlon,requestParams.get("w"));
+        imageBounds image = new imageBounds(depth(londpp), requestUllon, requestUllat, requestLrlon, requestLrlat);
+        results.put("render_grid", image.tiles());
+        results.put("raster_ul_lon", image.ullon);
+        results.put("raster_ul_lat", image.ullat);
+        results.put("raster_lr_lon", image.lrlon);
+        results.put("raster_lr_lat", image.lrlat);
+        results.put("depth", image.depth);
+        results.put("query_success", true);
         return results;
+    }
+
+    private double LonDPP(double ullon, double lrlon, double w) {
+        return (lrlon - ullon) / w;
+    }
+
+    private int depth(double LonDPP) {
+        int depth = 0;
+        while (depth < 7 && resolution(depth) > LonDPP) {
+            depth += 1;
+        }
+        return depth;
+    }
+
+    private double resolution(int depth) {
+        double basic = (ROOT_LRLON - ROOT_ULLON) / TILE_SIZE;
+        return basic / Math.pow(2, depth);
+    }
+
+    private boolean isSuccessful(double ullon, double ullat, double lrlon, double lrlat) {
+        if (ullon >= ROOT_LRLON || ullat <= ROOT_LRLAT || lrlon <= ROOT_ULLON || lrlat >= ROOT_ULLAT) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private class imageBounds {
+        double ullon, lrlon, ullat, lrlat;
+        double xDist, yDist;
+        int depth;
+        int ulX = 0;
+        int ulY = 0;
+        int lrX = 0;
+        int lrY = 0;
+
+        public imageBounds(int depth, double ullon, double ullat, double lrlon, double lrlat) {
+            this.xDist = (ROOT_LRLON - ROOT_ULLON) / (Math.pow(2, depth));
+            this.yDist = (ROOT_ULLAT - ROOT_LRLAT) / (Math.pow(2, depth));
+            this.ullon = ROOT_ULLON;
+            this.lrlon = this.ullon + xDist;
+            this.ullat = ROOT_ULLAT;
+            this.lrlat = this.ullat - yDist;
+            this.depth = depth;
+
+            calUL(ullon, ullat);
+            calLR(lrlon, lrlat);
+        }
+
+        public void calUL(double requestUllon, double requestUllat) {
+            double distLon = requestUllon - this.ullon;
+            double distLat = this.ullat - requestUllat;
+            if (distLon < 0) {
+                ulX = 0;
+            } else {
+                ulX = (int)(distLon / xDist);
+            }
+            if (distLat < 0) {
+                ulY = 0;
+            } else {
+                ulY = (int)(distLat / yDist);
+            }
+
+            this.ullon = this.ullon + ulX * xDist;
+            this.ullat = this.ullat - ulY * yDist;
+        }
+
+        public void calLR(double requestLrlon, double requestLrlat) {
+            double distLon = requestLrlon - this.lrlon;
+            if (distLon < 0) {
+                lrX = 1;
+            } else if (requestLrlon > ROOT_LRLON){
+                lrX = (int)Math.pow(2, depth) -1;
+            } else {
+                lrX = (int)(distLon / xDist) + 1;
+            }
+            if (distLon % xDist == 0) {
+                lrX = lrX - 1;
+            }
+
+            double distLat = this.lrlat - requestLrlat;
+            if (distLat < 0) {
+                lrY = 1;
+            } else if (requestLrlat < ROOT_LRLAT) {
+                lrY = (int)Math.pow(2, depth) -1;
+            } else {
+                lrY = (int)(distLat / yDist) + 1;
+            }
+            if (distLat % yDist == 0) {
+                lrY = lrY - 1;
+            }
+
+            this.lrlon = this.lrlon + lrX * xDist;
+            this.lrlat = this.lrlat - lrY * yDist;
+        }
+
+        public String[][] tiles() {
+            int countX = lrX - ulX + 1;
+            int countY = lrY - ulY + 1;
+            String[][] tiles = new String[countY][countX];
+            for (int y = 0; y < countY; y ++) {
+                for (int x = 0; x < countX; x ++) {
+                    tiles[y][x] = "d" + depth + "_x" + (x + ulX) + "_y" + (y + ulY) + ".png";
+                }
+            }
+            return tiles;
+        }
     }
 
     @Override

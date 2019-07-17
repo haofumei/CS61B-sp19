@@ -2,7 +2,13 @@ package bearmaps.proj2c;
 
 import bearmaps.hw4.streetmap.Node;
 import bearmaps.hw4.streetmap.StreetMapGraph;
+import bearmaps.proj2ab.KDTree;
 import bearmaps.proj2ab.Point;
+import bearmaps.proj2ab.PointSet;
+import bearmaps.proj2ab.WeirdPointSet;
+import bearmaps.lab9.MyTrieSet;
+import bearmaps.lab9.TrieSet61B;
+
 
 import java.util.*;
 
@@ -15,10 +21,28 @@ import java.util.*;
  */
 public class AugmentedStreetMapGraph extends StreetMapGraph {
 
+    List<Node> locaNode;
+    TrieSet61B locaName = new MyTrieSet();
+    Map<String, String> cleanTofullName = new HashMap<>();
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);
         // You might find it helpful to uncomment the line below:
-        // List<Node> nodes = this.getNodes();
+        locaNode = this.getNodes();
+        /*for (Node n : locaNode) {
+            if (n.name() == null) {
+                continue;
+            }
+            String cleanName = n.name();
+            // Removes Special Characters and Digits
+            cleanName = cleanName.replaceAll("[^a-zA-Z\\s]", "");
+            // Remove spaces
+            cleanName = cleanName.replaceAll("\\s+", " ");
+            // to lowercase
+            cleanName = cleanName.toLowerCase();
+            locaName.add(cleanName);
+            cleanTofullName.put(cleanName, n.name());
+           System.out.println(cleanName);
+        }*/
     }
 
 
@@ -30,8 +54,27 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * @return The id of the node in the graph closest to the target.
      */
     public long closest(double lon, double lat) {
-        return 0;
+        List<Point> locaPoint = new LinkedList<>();
+        Map<Point, Node> pointToNode = new HashMap<>();
+        // convert Node to Point
+        for (Node n : locaNode) {
+            Point toAdd = new Point(n.lon(), n.lat());
+            locaPoint.add(toAdd);
+            pointToNode.put(toAdd, n);
+        }
+
+        PointSet mapGraph = new KDTree(locaPoint);
+        Point closest = mapGraph.nearest(lon, lat);
+        long id = pointToNode.get(closest).id();
+        while (neighbors(id).isEmpty()) {
+            locaPoint.remove(closest);
+            mapGraph = new KDTree(locaPoint);
+            closest = mapGraph.nearest(lon, lat);
+            id = pointToNode.get(closest).id();
+        }
+        return id;
     }
+
 
 
     /**
@@ -43,8 +86,11 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * cleaned <code>prefix</code>.
      */
     public List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        List<String> toReturn = locaName.keysWithPrefix(prefix);
+        return toReturn;
     }
+
+
 
     /**
      * For Project Part III (gold points)

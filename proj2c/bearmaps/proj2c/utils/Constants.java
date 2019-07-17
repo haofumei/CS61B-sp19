@@ -12,7 +12,6 @@ import java.util.List;
  * Created by rahul
  */
 public class Constants {
-
     /**
      * The root upper left/lower right longitudes and latitudes represent the bounding box of
      * the root tile, as the images in the img/ folder are scraped.
