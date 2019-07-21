@@ -60,10 +60,10 @@ public class HexWorld {
     }
 
     private static Position computeNextUpperStart(Position p) {
-        return new Position(p.width - 1, p.height + 1);
+        return new Position(p.width - 1, p.height - 1);
     }
     private static Position computeNextLowerStart(Position p) {
-        return new Position(p.width + 1, p.height + 1);
+        return new Position(p.width + 1, p.height - 1);
     }
 
     private static Position computeEndPosition(Position start, int s, int row) {
