@@ -1,5 +1,7 @@
 package byow.InputDemo;
 
+import java.util.Random;
+
 /**
  * Created by hug.
  * Demonstrates how a single interface can be used to provide input
@@ -11,7 +13,7 @@ public class DemoInputSource {
     private static final int STRING = 2;
 
     public static void main(String[] args) {
-        int inputType = KEYBOARD;
+        int inputType = STRING;
 
         InputSource inputSource;
 
